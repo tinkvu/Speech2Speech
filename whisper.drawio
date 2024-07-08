@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-07-08T16:46:07.666Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" etag="t_IJLMom3eppAmRH_IGz" version="24.6.4" type="github">
+<mxfile host="app.diagrams.net" modified="2024-07-08T16:55:33.808Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" etag="zw23jkYOUNgWYt01mfn1" version="24.6.4" type="github">
   <diagram name="Page-1" id="gXbyF3qXyhQlLYsCx0Ya">
     <mxGraphModel dx="1400" dy="743" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -58,6 +58,9 @@
         </mxCell>
         <mxCell id="61okysOQSv1O7eJIanx_-31" value="Free Option" style="text;html=1;align=center;verticalAlign=middle;resizable=1;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry x="90" y="110" width="95" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="61okysOQSv1O7eJIanx_-37" value="Language Training Chatbot" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="330" y="40" width="170" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
