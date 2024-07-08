@@ -9,3 +9,6 @@ References:
 4. https://github.com/chidiwilliams/buzz
 
 5. https://github.com/Gustavoandresai/chatgpt-speaker-openai-whisper/tree/master
+
+6. https://medium.com/@sudha_41820/building-a-voice-agent-with-streamlit-a-beginners-guide-f929d0e250c1
+
