@@ -12,3 +12,6 @@ References:
 
 6. https://medium.com/@sudha_41820/building-a-voice-agent-with-streamlit-a-beginners-guide-f929d0e250c1
 
+7. Deepgram and Elevenlabs
+
+
