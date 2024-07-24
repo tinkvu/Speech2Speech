@@ -1,5 +1,5 @@
 streamlit
-gtts 
-audiorecorder
+gtts
 pydub
-groq
+requests
+streamlit-webrtc
