@@ -2,3 +2,4 @@ streamlit
 gtts
 requests
 streamlit-audiorecorder
+groq
