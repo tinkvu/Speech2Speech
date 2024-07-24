@@ -1,5 +1,4 @@
 streamlit
-gtts 
-audiorecorder
-pydub
+gTTS
+streamlit-audiorecorder
 groq
