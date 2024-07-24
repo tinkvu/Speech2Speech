@@ -1,8 +1,10 @@
 import streamlit as st
-import requests
+from audiorecorder import audiorecorder
 from gtts import gTTS
 import os
 import time
+import requests
+from io import BytesIO
 
 # Initialize Groq client
 class Groq:
@@ -10,11 +12,13 @@ class Groq:
         self.api_key = api_key
 
     def audio_transcriptions_create(self, file, model, response_format):
-        # Replace this mock with actual API call to your Groq client
+        # Mock implementation for the transcription API call
+        # Replace this with the actual API call to Groq
         return {"text": "Transcribed text from audio"}
 
     def chat_completions_create(self, model, messages, temperature, max_tokens, top_p, stream, stop):
-        # Replace this mock with actual API call to your Groq client
+        # Mock implementation for the chat completion API call
+        # Replace this with the actual API call to Groq
         class MockCompletion:
             def __init__(self):
                 self.choices = [type('Choice', (object,), {'delta': type('Delta', (object,), {'content': 'This is a response.'})()})]
@@ -24,17 +28,20 @@ class Groq:
 client = Groq(api_key="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")
 
 # Initialize chat history
-chat_history = [
-    {
-        "role": "system",
-        "content": "You are an English trainer. Your job is to keep communicating with the user and make them speak a lot. Using the chat history, chat and help improve their communication."
-    }
-]
+if 'conversation' not in st.session_state:
+    st.session_state.conversation = [
+        {
+            "role": "system",
+            "content": "You are an English trainer. Your job is to keep communicating with the user and make them speak a lot. Using the chat history, chat and help improve their communication."
+        }
+    ]
 
-def transcribe_audio(file_path):
-    with open(file_path, "rb") as file:
+def transcribe_audio(audio_bytes):
+    # Replace this mock implementation with actual API call
+    # Use BytesIO to handle audio bytes directly
+    with BytesIO(audio_bytes) as audio_file:
         transcription = client.audio_transcriptions_create(
-            file=file,
+            file=audio_file,
             model="whisper-large-v3",
             response_format="verbose_json",
         )
@@ -48,22 +55,24 @@ def play_audio(text):
     os.remove(audio_file)
 
 st.title("Voice Chatbot")
-st.write("Upload your audio file and have a conversation with the chatbot.")
+st.write("Record your voice and have a conversation with the chatbot.")
 
-uploaded_file = st.file_uploader("Choose an audio file", type=["wav", "mp3"])
+audio_bytes = audiorecorder("Click to record", "Recording...")
 
-if uploaded_file is not None:
-    # Save the uploaded file
-    filename = "user_input." + uploaded_file.name.split('.')[-1]
+if audio_bytes:
+    st.audio(audio_bytes, format="audio/wav")
+    
+    # Save the audio bytes to a file
+    filename = "user_input.wav"
     with open(filename, "wb") as f:
-        f.write(uploaded_file.getvalue())
+        f.write(audio_bytes)
     
     # Transcribe audio
-    user_input = transcribe_audio(filename)
+    user_input = transcribe_audio(audio_bytes)
     st.write(f"You said: {user_input}")
     
     # Append user message to chat history
-    chat_history.append({
+    st.session_state.conversation.append({
         "role": "user",
         "content": user_input
     })
@@ -71,7 +80,7 @@ if uploaded_file is not None:
     # Get response from the assistant
     completion = client.chat_completions_create(
         model="gemma2-9b-it",
-        messages=chat_history,
+        messages=st.session_state.conversation,
         temperature=1,
         max_tokens=1024,
         top_p=1,
@@ -91,7 +100,7 @@ if uploaded_file is not None:
     assistant_response_text = "".join(assistant_response)
 
     # Append assistant response to chat history
-    chat_history.append({
+    st.session_state.conversation.append({
         "role": "assistant",
         "content": assistant_response_text
     })
@@ -99,5 +108,3 @@ if uploaded_file is not None:
     # Play the assistant response
     play_audio(assistant_response_text)
     
-    # Wait for the audio to finish playing before asking for user input again
-    time.sleep(5)
