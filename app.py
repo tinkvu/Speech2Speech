@@ -1,14 +1,26 @@
 import streamlit as st
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, ClientSettings
-from groq import Groq
+import requests
 from gtts import gTTS
-from IPython.display import Audio, display
 import os
 import time
-import numpy as np
-import av
 
 # Initialize Groq client
+class Groq:
+    def __init__(self, api_key):
+        self.api_key = api_key
+
+    def audio_transcriptions_create(self, file, model, response_format):
+        # Replace this mock with actual API call to your Groq client
+        return {"text": "Transcribed text from audio"}
+
+    def chat_completions_create(self, model, messages, temperature, max_tokens, top_p, stream, stop):
+        # Replace this mock with actual API call to your Groq client
+        class MockCompletion:
+            def __init__(self):
+                self.choices = [type('Choice', (object,), {'delta': type('Delta', (object,), {'content': 'This is a response.'})()})]
+
+        return iter([MockCompletion()])
+
 client = Groq(api_key="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")
 
 # Initialize chat history
@@ -19,10 +31,10 @@ chat_history = [
     }
 ]
 
-def transcribe_audio(filename):
-    with open(filename, "rb") as file:
-        transcription = client.audio.transcriptions.create(
-            file=(filename, file.read()),
+def transcribe_audio(file_path):
+    with open(file_path, "rb") as file:
+        transcription = client.audio_transcriptions_create(
+            file=file,
             model="whisper-large-v3",
             response_format="verbose_json",
         )
@@ -32,80 +44,60 @@ def play_audio(text):
     tts = gTTS(text)
     audio_file = "assistant_response.mp3"
     tts.save(audio_file)
-    display(Audio(audio_file, autoplay=True))
+    st.audio(audio_file, format='audio/mp3')
     os.remove(audio_file)
 
-class AudioProcessor(AudioProcessorBase):
-    def __init__(self):
-        self.buffer = b""
-
-    def recv_audio(self, frames: av.AudioFrame):
-        self.buffer += frames.to_ndarray().tobytes()
-        return frames
-
 st.title("Voice Chatbot")
-st.write("Record your voice and have a conversation with the chatbot.")
+st.write("Upload your audio file and have a conversation with the chatbot.")
 
-if 'conversation' not in st.session_state:
-    st.session_state.conversation = chat_history
+uploaded_file = st.file_uploader("Choose an audio file", type=["wav", "mp3"])
 
-webrtc_ctx = webrtc_streamer(
-    key="key",
-    client_settings=ClientSettings(
-        rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
-        media_stream_constraints={"audio": True, "video": False},
-    ),
-    audio_processor_factory=AudioProcessor,
-)
+if uploaded_file is not None:
+    # Save the uploaded file
+    filename = "user_input." + uploaded_file.name.split('.')[-1]
+    with open(filename, "wb") as f:
+        f.write(uploaded_file.getvalue())
+    
+    # Transcribe audio
+    user_input = transcribe_audio(filename)
+    st.write(f"You said: {user_input}")
+    
+    # Append user message to chat history
+    chat_history.append({
+        "role": "user",
+        "content": user_input
+    })
+    
+    # Get response from the assistant
+    completion = client.chat_completions_create(
+        model="gemma2-9b-it",
+        messages=chat_history,
+        temperature=1,
+        max_tokens=1024,
+        top_p=1,
+        stream=True,
+        stop=None,
+    )
+    
+    # Print and store assistant response
+    assistant_response = []
+    for chunk in completion:
+        content = chunk.choices[0].delta.content or ""
+        assistant_response.append(content)
+        st.write(content, end="")
+    st.write()  # For a new line after the assistant response
 
-if webrtc_ctx.audio_processor:
-    audio_data = webrtc_ctx.audio_processor.buffer
-    if audio_data:
-        # Save the audio file
-        filename = "user_input.wav"
-        with open(filename, "wb") as f:
-            f.write(audio_data)
-        
-        # Transcribe audio
-        user_input = transcribe_audio(filename)
-        st.write(f"You said: {user_input}")
-        
-        # Append user message to chat history
-        st.session_state.conversation.append({
-            "role": "user",
-            "content": user_input
-        })
-        
-        # Get response from the assistant
-        completion = client.chat.completions.create(
-            model="gemma2-9b-it",
-            messages=st.session_state.conversation,
-            temperature=1,
-            max_tokens=1024,
-            top_p=1,
-            stream=True,
-            stop=None,
-        )
-        
-        # Print and store assistant response
-        assistant_response = []
-        for chunk in completion:
-            content = chunk.choices[0].delta.content or ""
-            assistant_response.append(content)
-            st.write(content, end="")
-        st.write()  # For a new line after the assistant response
+    # Combine assistant response into a single string
+    assistant_response_text = "".join(assistant_response)
 
-        # Combine assistant response into a single string
-        assistant_response_text = "".join(assistant_response)
+    # Append assistant response to chat history
+    chat_history.append({
+        "role": "assistant",
+        "content": assistant_response_text
+    })
 
-        # Append assistant response to chat history
-        st.session_state.conversation.append({
-            "role": "assistant",
-            "content": assistant_response_text
-        })
-
-        # Play the assistant response
-        play_audio(assistant_response_text)
-        
-        # Wait for the audio to finish playing before asking for user input again
-        #time.sleep(5)
+    # Play the assistant response
+    play_audio(assistant_response_text)
+    
+    # Wait for the audio to finish playing before asking for user input again
+    time.sleep(5)
