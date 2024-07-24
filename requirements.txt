@@ -1,5 +1,4 @@
 streamlit
-gtts
-requests
+gTTS
 streamlit-audiorecorder
 groq
