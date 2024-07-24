@@ -4,7 +4,6 @@ from gtts import gTTS
 import os
 import time
 from io import BytesIO
-import requests
 
 # Initialize Groq client
 class Groq:
@@ -57,6 +56,7 @@ def play_audio(text):
 st.title("Voice Chatbot")
 st.write("Record your voice and have a conversation with the chatbot.")
 
+# Record audio
 audio_bytes = audiorecorder("Click to record", "Recording...")
 
 if audio_bytes:
@@ -103,3 +103,5 @@ if audio_bytes:
     # Play the assistant response
     play_audio(assistant_response_text)
     
+    # Wait for the audio to finish playing before asking for user input again
+    #time.sleep(5)
