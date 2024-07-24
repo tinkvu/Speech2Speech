@@ -1,26 +1,47 @@
 import streamlit as st
 from audiorecorder import audiorecorder
-from groq import Groq
 from gtts import gTTS
-from IPython.display import Audio, display
-import time
 import os
+import time
+from io import BytesIO
+import requests
 
 # Initialize Groq client
+class Groq:
+    def __init__(self, api_key):
+        self.api_key = api_key
+
+    def audio_transcriptions_create(self, file, model, response_format):
+        # Mock implementation for the transcription API call
+        # Replace this with the actual API call to Groq
+        return {"text": "Transcribed text from audio"}
+
+    def chat_completions_create(self, model, messages, temperature, max_tokens, top_p, stream, stop):
+        # Mock implementation for the chat completion API call
+        # Replace this with the actual API call to Groq
+        class MockCompletion:
+            def __init__(self):
+                self.choices = [type('Choice', (object,), {'delta': type('Delta', (object,), {'content': 'This is a response.'})()})]
+
+        return iter([MockCompletion()])
+
 client = Groq(api_key="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")
 
 # Initialize chat history
-chat_history = [
-    {
-        "role": "system",
-        "content": "You are an English trainer. Your job is to keep communicating with the user and make them speak a lot. Using the chat history, chat and help improve their communication."
-    }
-]
+if 'conversation' not in st.session_state:
+    st.session_state.conversation = [
+        {
+            "role": "system",
+            "content": "You are an English trainer. Your job is to keep communicating with the user and make them speak a lot. Using the chat history, chat and help improve their communication."
+        }
+    ]
 
-def transcribe_audio(filename):
-    with open(filename, "rb") as file:
-        transcription = client.audio.transcriptions.create(
-            file=(filename, file.read()),
+def transcribe_audio(audio_bytes):
+    # Replace this mock implementation with actual API call
+    # Use BytesIO to handle audio bytes directly
+    with BytesIO(audio_bytes) as audio_file:
+        transcription = client.audio_transcriptions_create(
+            file=audio_file,
             model="whisper-large-v3",
             response_format="verbose_json",
         )
@@ -30,28 +51,19 @@ def play_audio(text):
     tts = gTTS(text)
     audio_file = "assistant_response.mp3"
     tts.save(audio_file)
-    display(Audio(audio_file, autoplay=True))
+    st.audio(audio_file, format='audio/mp3')
     os.remove(audio_file)
 
-# Streamlit app
 st.title("Voice Chatbot")
 st.write("Record your voice and have a conversation with the chatbot.")
 
-if 'conversation' not in st.session_state:
-    st.session_state.conversation = chat_history
+audio_bytes = audiorecorder("Click to record", "Recording...")
 
-# Record audio
-audio = audiorecorder("Click to record", "Recording...")
-
-if len(audio) > 0:
-    st.audio(audio.tobytes())
-    # Save the audio file
-    filename = "user_input.mp3"
-    with open(filename, "wb") as f:
-        f.write(audio.tobytes())
+if audio_bytes:
+    st.audio(audio_bytes, format="audio/wav")
     
     # Transcribe audio
-    user_input = transcribe_audio(filename)
+    user_input = transcribe_audio(audio_bytes)
     st.write(f"You said: {user_input}")
     
     # Append user message to chat history
@@ -61,7 +73,7 @@ if len(audio) > 0:
     })
     
     # Get response from the assistant
-    completion = client.chat.completions.create(
+    completion = client.chat_completions_create(
         model="gemma2-9b-it",
         messages=st.session_state.conversation,
         temperature=1,
@@ -91,5 +103,3 @@ if len(audio) > 0:
     # Play the assistant response
     play_audio(assistant_response_text)
     
-    # Wait for the audio to finish playing before asking for user input again
-    #time.sleep(5)
