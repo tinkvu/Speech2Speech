@@ -3,13 +3,6 @@ Basic App Diagram:
 ![Basic App Flow](AppFlow.drawio.png)
 
 
-![Flow](Flow.drawio)
-
-![streamlit](Streamlit.drawio)
-
-![trial](trial.drawio)
-
-![whisper](whisper.drawio)
 
 
 
