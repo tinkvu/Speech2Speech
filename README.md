@@ -1,6 +1,15 @@
 Basic App Diagram:
-[Image][AppFlow.drawio.png]
 
+[Basic App Flow](AppFlow.drawio.png)
+
+
+[Image](Flow.drawio)
+
+[Image](Streamlit.drawio)
+
+[](trial.drawio)
+
+[](whisper.drawio)
 
 
 
