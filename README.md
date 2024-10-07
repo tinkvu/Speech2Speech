@@ -1,3 +1,10 @@
+Basic App Diagram:
+[Image][AppFlow.drawio.png]
+
+
+
+
+
 References:
 
 1.https://github.com/SkalskiP/ai-demos/blob/master/notebooks/simple_voice_chatbot_with_openai_api_and_gradio.ipynb
